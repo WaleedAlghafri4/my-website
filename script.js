@@ -102,6 +102,7 @@ function updateCurrentPeriod() {
         // Calculate progress including seconds for smoother transition
         const totalDurationSeconds = (currentPeriod.endTimeMinutes - currentPeriod.startTimeMinutes) * 60;
         const elapsedSeconds = ((currentTime - currentPeriod.startTimeMinutes) * 60) + currentSeconds;
+        const remainingSeconds = totalDurationSeconds - elapsedSeconds;
         const progress = (elapsedSeconds / totalDurationSeconds) * 100;
         
         // Update display
@@ -109,7 +110,6 @@ function updateCurrentPeriod() {
         progressBar.style.width = `${progress}%`;
         
         // تحديث لون التدرج بناءً على الوقت المتبقي
-        const remainingSeconds = totalDurationSeconds - elapsedSeconds;
         const remainingPercentage = (remainingSeconds / totalDurationSeconds) * 100;
         const hue = Math.max(0, Math.min(60, remainingPercentage));
         progressBar.style.background = `linear-gradient(to right, 
@@ -119,13 +119,23 @@ function updateCurrentPeriod() {
         
         // عرض الوقت المتبقي
         const remainingMinutes = Math.floor(remainingSeconds / 60);
-        if (remainingMinutes <= 1) {
+        
+        if (remainingSeconds <= 60) {
             // عرض الثواني عندما يتبقى أقل من دقيقة
-            const remainingSecondsDisplay = Math.floor(remainingSeconds % 60);
-            timeRemainingElement.textContent = `${remainingSecondsDisplay} seconds remaining`;
+            const remainingSecondsDisplay = Math.ceil(remainingSeconds);
+            timeRemainingElement.textContent = `${remainingSecondsDisplay} seconds`;
+            
+            // إضافة تأثير نبض في الثواني الأخيرة
+            if (remainingSecondsDisplay <= 10) {
+                timeRemainingElement.style.animation = 'pulse 1s infinite';
+            } else {
+                timeRemainingElement.style.animation = 'none';
+            }
         } else {
-            timeRemainingElement.textContent = `${remainingMinutes} minutes remaining`;
+            timeRemainingElement.textContent = `${remainingMinutes} minutes`;
+            timeRemainingElement.style.animation = 'none';
         }
+        
         // جعل لون النص أبيض دائماً
         timeRemainingElement.style.color = '#ffffff';
     } else {
@@ -134,6 +144,7 @@ function updateCurrentPeriod() {
         progressBar.style.width = '0%';
         timeRemainingElement.textContent = '';
         timeRemainingElement.style.color = '#ffffff';
+        timeRemainingElement.style.animation = 'none';
     }
 }
 
